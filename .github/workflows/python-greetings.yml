@@ -1,0 +1,100 @@
+name: python-greetings-pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  install-pip-deps:
+    runs-on: self-hosted
+    steps:
+      - name: Log stage
+        run: echo "Installing all required pip dependencies..."
+      - uses: ./.github/actions/install-deps
+
+  deploy-to-dev:
+    runs-on: self-hosted
+    needs: install-pip-deps
+    steps:
+      - name: Log stage
+        run: echo "Deploying to DEV on port 7001..."
+      - uses: ./.github/actions/deploy
+        with:
+          environment: dev
+          port: "7001"
+
+  tests-on-dev:
+    runs-on: self-hosted
+    needs: deploy-to-dev
+    steps:
+      - name: Log stage
+        run: echo "Running tests on DEV..."
+      - uses: ./.github/actions/run-tests
+        with:
+          environment: dev
+
+  deploy-to-stg:
+    runs-on: self-hosted
+    needs: tests-on-dev
+    steps:
+      - name: Log stage
+        run: echo "Deploying to STG on port 7002..."
+      - uses: ./.github/actions/deploy
+        with:
+          environment: stg
+          port: "7002"
+
+  tests-on-stg:
+    runs-on: self-hosted
+    needs: deploy-to-stg
+    steps:
+      - name: Log stage
+        run: echo "Running tests on STG..."
+      - uses: ./.github/actions/run-tests
+        with:
+          environment: stg
+
+  deploy-to-preprod:
+    runs-on: self-hosted
+    needs: tests-on-stg
+    steps:
+      - name: Log stage
+        run: echo "Deploying to PREPROD on port 7003..."
+      - uses: ./.github/actions/deploy
+        with:
+          environment: preprod
+          port: "7003"
+
+  tests-on-preprod:
+    runs-on: self-hosted
+    needs: deploy-to-preprod
+    steps:
+      - name: Log stage
+        run: echo "Running tests on PREPROD..."
+      - uses: ./.github/actions/run-tests
+        with:
+          environment: preprod
+
+  deploy-to-prod:
+    runs-on: self-hosted
+    needs: tests-on-preprod
+    steps:
+      - name: Log stage
+        run: echo "Deploying to PROD on port 7004..."
+      - uses: ./.github/actions/deploy
+        with:
+          environment: prod
+          port: "7004"
+
+  tests-on-prod:
+    runs-on: self-hosted
+    needs: deploy-to-prod
+    steps:
+      - name: Log stage
+        run: echo "Running tests on PROD..."
+      - uses: ./.github/actions/run-tests
+        with:
+          environment: prod
