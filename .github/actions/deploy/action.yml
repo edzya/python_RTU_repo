@@ -21,6 +21,16 @@ runs:
         repository: mtararujs/python-greetings
         path: python-greetings
 
+    - name: Create virtual environment
+      shell: cmd
+      working-directory: python-greetings
+      run: python -m venv venv
+
+    - name: Install dependencies
+      shell: cmd
+      working-directory: python-greetings
+      run: venv\Scripts\python.exe -m pip install -r requirements.txt
+
     - name: Stop existing service if running
       shell: cmd
       working-directory: python-greetings
@@ -29,4 +39,12 @@ runs:
     - name: Start service with pm2
       shell: cmd
       working-directory: python-greetings
-      run: pm2 start app.py --name greetings-app-${{ inputs.environment }} -- --port ${{ inputs.port }}
+      run: pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter venv\Scripts\python.exe -- --port ${{ inputs.port }}
+
+    - name: Wait for app startup
+      shell: cmd
+      run: timeout /t 5 /nobreak
+
+    - name: Show pm2 processes
+      shell: cmd
+      run: pm2 list
