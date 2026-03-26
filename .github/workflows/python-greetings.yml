@@ -11,6 +11,8 @@ jobs:
   install-pip-deps:
     runs-on: self-hosted
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Installing all required pip dependencies..."
       - uses: ./.github/actions/install-deps
@@ -19,6 +21,8 @@ jobs:
     runs-on: self-hosted
     needs: install-pip-deps
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Deploying to DEV on port 7001..."
       - uses: ./.github/actions/deploy
@@ -30,6 +34,8 @@ jobs:
     runs-on: self-hosted
     needs: deploy-to-dev
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Running tests on DEV..."
       - uses: ./.github/actions/run-tests
@@ -40,6 +46,8 @@ jobs:
     runs-on: self-hosted
     needs: tests-on-dev
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Deploying to STG on port 7002..."
       - uses: ./.github/actions/deploy
@@ -51,6 +59,8 @@ jobs:
     runs-on: self-hosted
     needs: deploy-to-stg
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Running tests on STG..."
       - uses: ./.github/actions/run-tests
@@ -61,6 +71,8 @@ jobs:
     runs-on: self-hosted
     needs: tests-on-stg
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Deploying to PREPROD on port 7003..."
       - uses: ./.github/actions/deploy
@@ -72,6 +84,8 @@ jobs:
     runs-on: self-hosted
     needs: deploy-to-preprod
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Running tests on PREPROD..."
       - uses: ./.github/actions/run-tests
@@ -82,6 +96,8 @@ jobs:
     runs-on: self-hosted
     needs: tests-on-preprod
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Deploying to PROD on port 7004..."
       - uses: ./.github/actions/deploy
@@ -93,6 +109,8 @@ jobs:
     runs-on: self-hosted
     needs: deploy-to-prod
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Log stage
         run: echo "Running tests on PROD..."
       - uses: ./.github/actions/run-tests
