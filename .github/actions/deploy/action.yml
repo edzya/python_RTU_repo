@@ -50,8 +50,8 @@ runs:
         pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter "%CD%\venv\Scripts\python.exe" -- --port ${{ inputs.port }}un: pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter venv\Scripts\python.exe -- --port ${{ inputs.port }}
 
     - name: Wait for app startup
-      shell: cmd
-      run: timeout /t 5 /nobreak
+      shell: powershell
+      run: Start-Sleep -Seconds 5
 
     - name: Show pm2 processes
       shell: cmd
