@@ -1,76 +1,42 @@
-name: "Deploy Python Greetings Service"
-description: "Deploys python-greetings to a given environment using pm2"
+name: 'Deploy Python Greetings Service'
+description: 'Deploys python-greetings to a given environment using pm2'
 
 inputs:
   environment:
-    description: "Environment name: dev, stg, preprod, prod"
+    description: 'Environment name: dev, stg, preprod, prod'
     required: true
   port:
-    description: "Port number for the service"
+    description: 'Port number for the service'
     required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Checkout pipeline repo
-      uses: actions/checkout@v4
-
     - name: Checkout python-greetings repo
       uses: actions/checkout@v4
       with:
         repository: mtararujs/python-greetings
         path: python-greetings
 
-    - name: Create virtual environment
-      shell: cmd
-      working-directory: python-greetings
-      run: python -m venv venv
-
-    - name: Install dependencies
-      shell: cmd
-      working-directory: python-greetings
-      run: venv\Scripts\python.exe -m pip install -r requirements.txt
-
     - name: Stop existing service if running
       shell: cmd
-      working-directory: python-greetings
       run: pm2 delete greetings-app-${{ inputs.environment }} & EXIT /B 0
 
-    - name: Show python path
+    - name: Copy app to stable deployment folder
       shell: cmd
-      working-directory: python-greetings
       run: |
-        echo %CD%
-        dir venv\Scripts\python.exe
+        if not exist "C:\deployments\greetings-app-${{ inputs.environment }}" mkdir "C:\deployments\greetings-app-${{ inputs.environment }}"
+        xcopy /E /Y /I "%GITHUB_WORKSPACE%\python-greetings" "C:\deployments\greetings-app-${{ inputs.environment }}"
 
-    - name: Start service with pm2
+    - name: Start service with pm2 from stable folder
       shell: cmd
-      working-directory: python-greetings
-      run: |
-        pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter "%CD%\venv\Scripts\python.exe" -- --port ${{ inputs.port }}
+      run: pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter python -- --port ${{ inputs.port }}
+      working-directory: C:\deployments\greetings-app-${{ inputs.environment }}
 
-    - name: Wait for app startup
-      shell: powershell
-      run: Start-Sleep -Seconds 5
+    - name: Wait for service to be ready
+      shell: cmd
+      run: timeout /t 3 /nobreak
 
-    - name: Show pm2 processes
+    - name: Verify service is running
       shell: cmd
       run: pm2 list
-
-    - name: Show pm2 logs
-      shell: cmd
-      run: pm2 logs greetings-app-${{ inputs.environment }} --lines 20 --nostream
-
-    - name: Check service response
-      shell: powershell
-      run: |
-        try {
-          $r = Invoke-WebRequest -Uri http://127.0.0.1:${{ inputs.port }}/greetings -UseBasicParsing
-          Write-Host "Status:" $r.StatusCode
-          Write-Host "Body:" $r.Content
-        } catch {
-          Write-Host "Health check failed"
-          Write-Host $_
-          pm2 logs greetings-app-${{ inputs.environment }} --lines 50 --nostream
-          exit 1
-        }
