@@ -12,8 +12,11 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout pipeline repo
+      uses: actions/checkout@v6
+
     - name: Checkout python-greetings repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: mtararujs/python-greetings
         path: python-greetings
@@ -28,10 +31,15 @@ runs:
         if not exist "C:\deployments\greetings-app-${{ inputs.environment }}" mkdir "C:\deployments\greetings-app-${{ inputs.environment }}"
         xcopy /E /Y /I "%GITHUB_WORKSPACE%\python-greetings" "C:\deployments\greetings-app-${{ inputs.environment }}"
 
-    - name: Start service with pm2 from stable folder
+    - name: Install dependencies in deployment folder
       shell: cmd
-      run: pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter python -- --port ${{ inputs.port }}
       working-directory: C:\deployments\greetings-app-${{ inputs.environment }}
+      run: pip install -r requirements.txt
+
+    - name: Start service with pm2
+      shell: cmd
+      working-directory: C:\deployments\greetings-app-${{ inputs.environment }}
+      run: pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter python -- --port ${{ inputs.port }}
 
     - name: Wait for service to be ready
       shell: cmd
