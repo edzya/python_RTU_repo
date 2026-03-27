@@ -35,7 +35,7 @@ runs:
 
     - name: Wait for service to be ready
       shell: cmd
-      run: timeout /t 3 /nobreak
+      run: ping 127.0.0.1 -n 4 > nul
 
     - name: Verify service is running
       shell: cmd
