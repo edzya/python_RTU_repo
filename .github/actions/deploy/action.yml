@@ -44,17 +44,22 @@ runs:
         dir venv\Scripts\python.exe
 
     - name: Start service with pm2
-      shell: powershell
+      shell: cmd
       working-directory: python-greetings
       run: |
-          $pythonPath = Join-Path $PWD "venv\Scripts\python.exe"
-          Write-Host "Using interpreter: $pythonPath"
-          Write-Host "Using port: ${{ inputs.port }}"
-          pm2 start $pythonPath --name greetings-app-${{ inputs.environment }} -- app.py --port ${{ inputs.port }}
+        pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter "%CD%\venv\Scripts\python.exe" -- --port ${{ inputs.port }}
 
     - name: Wait for app startup
       shell: powershell
       run: Start-Sleep -Seconds 5
+
+    - name: Show pm2 processes
+      shell: cmd
+      run: pm2 list
+
+    - name: Show pm2 logs
+      shell: cmd
+      run: pm2 logs greetings-app-${{ inputs.environment }} --lines 20 --nostream
 
     - name: Check service response
       shell: powershell
@@ -65,11 +70,7 @@ runs:
           Write-Host "Body:" $r.Content
         } catch {
           Write-Host "Health check failed"
-        Write-Host $_
-        pm2 logs greetings-app-${{ inputs.environment }} --lines 50 --nostream
-        exit 1
-          }
-
-    - name: Show pm2 processes
-      shell: cmd
-      run: pm2 list
+          Write-Host $_
+          pm2 logs greetings-app-${{ inputs.environment }} --lines 50 --nostream
+          exit 1
+        }
