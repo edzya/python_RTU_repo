@@ -47,10 +47,11 @@ runs:
       shell: powershell
       working-directory: python-greetings
       run: |
-        $pythonPath = Join-Path $PWD "venv\Scripts\python.exe"
-        Write-Host "Using interpreter: $pythonPath"
-        Write-Host "Using port: ${{ inputs.port }}"
-        pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter $pythonPath -- --port ${{ inputs.port }}
+          $pythonPath = Join-Path $PWD "venv\Scripts\python.exe"
+          Write-Host "Using interpreter: $pythonPath"
+          Write-Host "Using port: ${{ inputs.port }}"
+          pm2 start $pythonPath --name greetings-app-${{ inputs.environment }} -- app.py --port ${{ inputs.port }}
+
     - name: Wait for app startup
       shell: powershell
       run: Start-Sleep -Seconds 5
