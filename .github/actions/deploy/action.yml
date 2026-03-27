@@ -1,12 +1,12 @@
-name: 'Deploy Python Greetings Service'
-description: 'Deploys python-greetings to a given environment using pm2'
+name: "Deploy Python Greetings Service"
+description: "Deploys python-greetings to a given environment using pm2"
 
 inputs:
   environment:
-    description: 'Environment name: dev, stg, preprod, prod'
+    description: "Environment name: dev, stg, preprod, prod"
     required: true
   port:
-    description: 'Port number for the service'
+    description: "Port number for the service"
     required: true
 
 runs:
@@ -44,11 +44,13 @@ runs:
         dir venv\Scripts\python.exe
 
     - name: Start service with pm2
-      shell: cmd
+      shell: powershell
       working-directory: python-greetings
       run: |
-        pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter "%CD%\venv\Scripts\python.exe" -- --port ${{ inputs.port }}un: pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter venv\Scripts\python.exe -- --port ${{ inputs.port }}
-
+        $pythonPath = Join-Path $PWD "venv\Scripts\python.exe"
+        Write-Host "Using interpreter: $pythonPath"
+        Write-Host "Using port: ${{ inputs.port }}"
+        pm2 start app.py --name greetings-app-${{ inputs.environment }} --interpreter $pythonPath -- --port ${{ inputs.port }}
     - name: Wait for app startup
       shell: powershell
       run: Start-Sleep -Seconds 5
